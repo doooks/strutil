@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// if a non-ascii rune is part of the prefix, we panic
+
 func TestCommonPrefix(t *testing.T) {
 	requireEqual(t, [][2]interface{}{
 		{"", stringutil.CommonPrefix("", "")},
@@ -17,6 +19,9 @@ func TestCommonPrefix(t *testing.T) {
 		{"a", stringutil.CommonPrefix("aab", "ab")},
 		{"aa", stringutil.CommonPrefix("aab", "aaab")},
 		{"aa", stringutil.CommonPrefix("aaab", "aab")},
+		{"\u2019", stringutil.CommonPrefix("\u2019a", "\u2019b")},          // panic: runtime error: index out of range [3] with length 2
+		{"a\u2019bc", stringutil.CommonPrefix("a\u2019bcd", "a\u2019bce")}, // expected: "a’bc" actual  : "a’"
+		{"abc", stringutil.CommonPrefix("abc\u2019d", "abc\u2020d")},       // does the right thing
 	})
 }
 
